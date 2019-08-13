@@ -9,7 +9,6 @@ ENV ASKOMICS="https://github.com/askomics/askomics.git" \
     SPARQL_UPDATE=true
 
 # Copy files
-COPY monitor_traffic.sh /monitor_traffic.sh
 COPY start.sh /start.sh
 COPY dump.template.nq /dump.template.nq
 
