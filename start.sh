@@ -23,20 +23,16 @@ sed -i "s@__GALAXY_KEY__@$API_KEY@g" /dump.nq
 mkdir /data/toLoad
 mv /dump.nq /data/toLoad
 
-# Link galaxy uplaoded datasets into askomics upload dir
+# Link galaxy uploaded datasets into askomics upload dir
 mkdir -p $ASKO_files_dir/upload
 ln -s /import $ASKO_files_dir/upload/$username
-
-# Monitor traffic
-chmod +x /monitor_traffic.sh
-/monitor_traffic.sh &
 
 # Start Virtuoso
 chmod +x /virtuoso.sh
 /virtuoso.sh &
 
 # Wait for virtuoso to be up
-while ! wget -o /dev/null http://localhost:8890/conductor; do
+while ! wget -O /dev/null -o /dev/null http://localhost:8890/conductor; do
     sleep 1s
 done
 
@@ -49,4 +45,5 @@ if [[ $PROXY_PREFIX != "" ]]; then
 fi
 
 # Start AskOmics
-${ASKOMICS_DIR}/startAskomics.sh -r
+cd ${ASKOMICS_DIR}
+./startAskomics.sh -r
