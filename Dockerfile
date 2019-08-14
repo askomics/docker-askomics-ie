@@ -16,7 +16,7 @@ COPY dump.template.nq /dump.template.nq
 RUN apk add --update bash make gcc g++ zlib-dev libzip-dev bzip2-dev xz-dev git python3 python3-dev nodejs nodejs-npm wget && \
     git clone ${ASKOMICS} ${ASKOMICS_DIR} && \
     cd ${ASKOMICS_DIR} && \
-    git checkout -b ${ASKOMICS_VERSION} origin/${ASKOMICS_VERSION} && \
+    git reset --hard ${ASKOMICS_VERSION} && \
     npm install gulp -g && \
     npm install --production && \
     chmod +x startAskomics.sh && \
