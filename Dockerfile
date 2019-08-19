@@ -11,17 +11,20 @@ ENV ASKOMICS="https://github.com/askomics/askomics.git" \
 # Copy files
 COPY start.sh /start.sh
 COPY dump.template.nq /dump.template.nq
+COPY startAskomics.sh /startAskomics.sh
 
 # Install prerequisites, clone repository and install
-RUN apk add --update bash make gcc g++ zlib-dev libzip-dev bzip2-dev xz-dev git python3 python3-dev nodejs nodejs-npm wget && \
+RUN apk add --update bash make gcc g++ zlib-dev libzip-dev bzip2-dev xz-dev git python3 python3-dev nodejs nodejs-npm wget py3-numpy py3-psutil py3-ldap3 && \
     git clone ${ASKOMICS} ${ASKOMICS_DIR} && \
     cd ${ASKOMICS_DIR} && \
     git reset --hard ${ASKOMICS_VERSION} && \
     npm install gulp -g && \
     npm install --production && \
+    cp /startAskomics.sh . && \
     chmod +x startAskomics.sh && \
     rm -rf /usr/local/askomics/venv && \
     bash ./startAskomics.sh -b && \
+    apk del make gcc g++ && \
     rm -rf /var/cache/apk/* && \
     chmod +x /start.sh
 
