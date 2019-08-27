@@ -3,7 +3,7 @@ services:
   - docker
 install:
   - docker build -t askomics-ie .
-  - docker run -d -p 6543:6543 askomics-ie
+  - docker run -d -p 6543:6543 -p 8890:8890 -e ASKO_files_dir='/tmp/askomics-ie' -e ASKO_database_path='/tmp/askomics-ie/database.db' -e ASKO_load_url='http://localhost:6543' -e SPARQL_UPDATE='true' -e GALAXY_USER_NAME='jdoe' -e GALAXY_USER_EMAIL='jdoe@example.com' -e ASKOMICS_API_KEY='jdoe' askomics-ie
 before_script:
    - sleep 1m
 script:

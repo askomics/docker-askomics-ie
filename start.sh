@@ -1,42 +1,23 @@
 #! /bin/bash
 
-# get user info
-username="Galaxy" #FIXME: get the galaxy username
-pw_hash="" # no password
-salt="" # no salt
+# Create the database with the Galaxy user
+mkdir -p ${ASKO_files_dir}
+sqlite3 ${ASKO_database_path} "CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT, username text, email text, password text, salt text, apikey text, admin boolean, blocked boolean);"
+sqlite3 ${ASKO_database_path} "INSERT INTO users VALUES (NULL, '${GALAXY_USER_NAME}', '${GALAXY_USER_EMAIL}', '', '', '${ASKOMICS_API_KEY}', 'true', 'false')"
 
-# sed the dump template
-cp /dump.template.nq /dump.nq
-sed -i "s@__USERNAME__@$username@g" /dump.nq
-sed -i "s/__EMAIL__/$USER_EMAIL/g" /dump.nq
-sed -i "s@__PASSWORD_HASH__@$pw_hash@g" /dump.nq
-sed -i "s@__SALT__@$salt@g" /dump.nq
+sqlite3 ${ASKO_database_path} "CREATE TABLE IF NOT EXISTS galaxy_accounts (galaxy_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, url text, apikey text, FOREIGN KEY(user_id) REFERENCES users(user_id));"
+sqlite3 ${ASKO_database_path} "INSERT INTO galaxy_accounts VALUES(NULL, 1, '${GALAXY_URL}', '${GALAXY_API_KEY}');"
 
-sed -i "s@__ASKOMICS_KEY_ID__@galaxy_5Dvp@g" /dump.nq
-sed -i "s@__ASKOMICS_KEY_NAME__@galaxy@g" /dump.nq
-sed -i "s@__ASKOMICS_API_KEY__@$ASKOMICS_API_KEY@g" /dump.nq
-
-sed -i "s@__GALAXY_ID__@$galaxy_id@g" /dump.nq
-sed -i "s@__GALAXY_URL__@$GALAXY_URL@g" /dump.nq
-sed -i "s@__GALAXY_KEY__@$API_KEY@g" /dump.nq
-
-mkdir /data/toLoad
-mv /dump.nq /data/toLoad
-
-# Link galaxy uplaoded datasets into askomics upload dir
-mkdir -p $ASKO_files_dir/upload
-ln -s /import $ASKO_files_dir/upload/$username
-
-# Monitor traffic
-chmod +x /monitor_traffic.sh
-/monitor_traffic.sh &
+# Link galaxy uploaded datasets into askomics upload dir
+mkdir -p ${ASKO_files_dir}/${GALAXY_USER_NAME}
+ln -s /import ${ASKO_files_dir}/${GALAXY_USER_NAME}/upload
 
 # Start Virtuoso
 chmod +x /virtuoso.sh
 /virtuoso.sh &
 
 # Wait for virtuoso to be up
-while ! wget -o /dev/null http://localhost:8890/conductor; do
+while ! wget -O /dev/null http://localhost:8890/conductor; do
     sleep 1s
 done
 
@@ -49,4 +30,5 @@ if [[ $PROXY_PREFIX != "" ]]; then
 fi
 
 # Start AskOmics
-${ASKOMICS_DIR}/startAskomics.sh -r
+cd ${ASKOMICS_DIR}
+./startAskomics.sh -r
